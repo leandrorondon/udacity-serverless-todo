@@ -19,6 +19,7 @@ provider:
     TODOS_BY_USER_IDX: TodosByUserIdx
     S3_BUCKET: todos-uploads-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+    JWKS_URL: https://rondondev.us.auth0.com/.well-known/jwks.json
 
 custom:
   documentation:
@@ -34,8 +35,8 @@ custom:
 
 functions:
 
-  # Auth:
-  #   handler: src/lambda/auth/auth0Authorizer.handler
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
 
   # # TODO: Configure this function
   # GetTodos:
@@ -51,6 +52,7 @@ functions:
       - http:
           method: post
           path: todos
+          authorizer: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new Todo Item
@@ -85,6 +87,7 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
+          authorizer: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
