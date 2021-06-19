@@ -1,9 +1,9 @@
 service:
   name: serverless-todo-app
 
-#plugins:
-#  - serverless-webpack
-#  - serverless-iam-roles-per-function
+plugins:
+  - serverless-webpack
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
@@ -16,8 +16,9 @@ provider:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_BY_USER_IDX: TodosByUserIdx
     S3_BUCKET: todos-uploads-${self:provider.stage}
+    SIGNED_URL_EXPIRATION: 300
 
-#functions:
+functions:
 
   # Auth:
   #   handler: src/lambda/auth/auth0Authorizer.handler
@@ -54,13 +55,17 @@ provider:
   #         method: delete
   #         path: todos/{todoId}
 
-  # # TODO: Configure this function
-  # GenerateUploadUrl:
-  #   handler: src/lambda/http/generateUploadUrl.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: todos/{todoId}/attachment
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/attachment
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+        Resource: arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*
 
 resources:
   Resources:
