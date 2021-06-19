@@ -15,6 +15,7 @@ provider:
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_BY_USER_IDX: TodosByUserIdx
+    S3_BUCKET: todos-uploads-${self:provider.stage}
 
 #functions:
 
@@ -88,4 +89,22 @@ resources:
               - AttributeName: userId
                 KeyType: RANGE
             Projection:
-              ProjectionType: ALL # What attributes will be copied to an indexs
+              ProjectionType: ALL
+
+    FileUploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
