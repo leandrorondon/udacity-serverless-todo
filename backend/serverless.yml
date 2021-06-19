@@ -4,6 +4,8 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-reqvalidator-plugin
+  - serverless-aws-documentation
 
 provider:
   name: aws
@@ -17,6 +19,18 @@ provider:
     TODOS_BY_USER_IDX: TodosByUserIdx
     S3_BUCKET: todos-uploads-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
+
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: Serverles ToDo
+        description: Serverless application for ToDo List
+    models:
+      - name: CreateTodoRequest
+        contentType: application/json
+        schema: ${file(src/requests/create-todo-request.json)}
 
 functions:
 
@@ -37,6 +51,12 @@ functions:
       - http:
           method: post
           path: todos
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Create a new Todo Item
+            description: Create a new Todo Item
+            requestModels:
+              'application/json': CreateTodoRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -117,3 +137,12 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
+
+    RequestBodyValidator:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: 'request-body-validator'
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: false
