@@ -1,12 +1,14 @@
 import 'source-map-support/register'
 
 import * as AWS  from 'aws-sdk'
-
 import { TodoItem } from '../models/TodoItem'
+
+const AWSXRay = require('aws-xray-sdk')
+const XAWS = AWSXRay.captureAWS(AWS)
+const docClient = new XAWS.DynamoDB.DocumentClient()
 
 const todosTable = process.env.TODOS_TABLE
 const todosByUserIdx = process.env.TODOS_BY_USER_IDX
-const docClient = new AWS.DynamoDB.DocumentClient()
 
 export async function createTodoItem(item: TodoItem) {
     await docClient.put({

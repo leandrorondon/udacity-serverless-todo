@@ -2,7 +2,9 @@ import 'source-map-support/register'
 
 import * as AWS from 'aws-sdk'
 
-const s3 = new AWS.S3({
+const AWSXRay = require('aws-xray-sdk')
+const XAWS = AWSXRay.captureAWS(AWS)
+const s3 = new XAWS.S3({
     signatureVersion: 'v4'
 })
 
