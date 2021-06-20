@@ -15,7 +15,7 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    TODOS_TABLE: Todos-${self:provider.stage}
+    TODOS_TABLE: TodosItems-${self:provider.stage}
     TODOS_BY_USER_IDX: TodosByUserIdx
     S3_BUCKET: todos-uploads-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
@@ -94,6 +94,20 @@ functions:
           - s3:PutObject
         Resource: arn:aws:s3:::${self:provider.environment.S3_BUCKET}/*
 
+  SetAttachmentUrl:
+    handler: src/lambda/s3/setAttachmentUrl.handler
+    events:
+      - s3:
+          bucket: ${self:provider.environment.S3_BUCKET}
+          event: s3:ObjectCreated:*
+          existing: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+
 resources:
   Resources:
     TodosTable:
@@ -109,16 +123,14 @@ resources:
         KeySchema:
           - AttributeName: todoId
             KeyType: HASH
-          - AttributeName: createdAt
-            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
-        LocalSecondaryIndexes:
+        GlobalSecondaryIndexes:
           - IndexName: ${self:provider.environment.TODOS_BY_USER_IDX}
             KeySchema:
-              - AttributeName: todoId
-                KeyType: HASH
               - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL

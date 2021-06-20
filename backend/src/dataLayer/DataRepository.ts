@@ -13,3 +13,14 @@ export async function createTodoItem(item: TodoItem) {
         Item: item
     }).promise()
 }
+
+export async function getTodoItem(todoId: string): Promise<TodoItem> {
+    const result = await docClient.get({
+        TableName: todosTable,
+        Key: {
+          todoId
+        }
+      }).promise()
+
+    return result.Item as TodoItem
+}
