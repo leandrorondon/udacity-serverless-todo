@@ -2,7 +2,7 @@
 import 'source-map-support/register'
 
 import { getUploadUrl, buildAttachmentUrl } from '../dataLayer/FileRepository'
-import { createTodoItem, getTodoItem } from '../dataLayer/DataRepository'
+import { createTodoItem, getTodoItem, getTodosByUser} from '../dataLayer/DataRepository'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
@@ -51,3 +51,6 @@ export async function setTodoItemAttachment(itemId: string) {
     await createTodoItem(item)
 }
 
+export async function listTodos(userId: string): Promise<TodoItem[]> {
+    return await getTodosByUser(userId)
+}

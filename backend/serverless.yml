@@ -15,7 +15,7 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    TODOS_TABLE: TodosItems-${self:provider.stage}
+    TODOS_TABLE: Todos-${self:provider.stage}
     TODOS_BY_USER_IDX: TodosByUserIdx
     S3_BUCKET: todos-uploads-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
@@ -38,13 +38,19 @@ functions:
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # # TODO: Configure this function
-  # GetTodos:
-  #   handler: src/lambda/http/getTodos.handler
-  #   events:
-  #     - http:
-  #         method: get
-  #         path: todos
+  GetTodos:
+    handler: src/lambda/http/getTodos.handler
+    events:
+      - http:
+          method: get
+          path: todos
+          authorizer: Auth
+          reqValidatorName: RequestBodyValidator
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_BY_USER_IDX}
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
