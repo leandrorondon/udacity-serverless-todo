@@ -1,10 +1,11 @@
 import 'source-map-support/register'
 
 import { getUploadUrl, buildAttachmentUrl, deleteFile } from '../dataLayer/FileRepository'
-import { createTodoItem, getTodoItem, getTodosByUser, deleteTodoItem } from '../dataLayer/DataRepository'
+import { createTodoItem, getTodoItem, getTodosByUser, deleteTodoItem, updateTodoItem } from '../dataLayer/DataRepository'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
+import { TodoUpdate } from '../models/TodoUpdate'
 
 const logger = createLogger('BL')
 
@@ -65,4 +66,17 @@ export async function deleteTodo(todoId: string) {
     }
 
     await deleteTodoItem(todoId)
+}
+
+export async function updateTodo(todoId: string, values: TodoUpdate) {
+    const item = await getTodoItem(todoId)
+    if (!item) {
+        return
+    }
+
+    item.done = values.done
+    item.name = values.name
+    item.dueDate = values.dueDate
+
+    await updateTodoItem(item)
 }

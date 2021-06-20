@@ -47,3 +47,22 @@ export async function deleteTodoItem(todoId: string) {
         }
     }).promise()
 }
+
+export async function updateTodoItem(item: TodoItem) {
+    const todoId = item.todoId
+    await docClient.update({
+        TableName: todosTable,
+        Key: {
+          todoId
+        },
+        UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
+        ExpressionAttributeNames: {
+          "#name": "name"
+        },
+        ExpressionAttributeValues: {
+          ":name": item.name,
+          ":dueDate": item.dueDate,
+          ":done": item.done
+        }
+      }).promise()
+}
