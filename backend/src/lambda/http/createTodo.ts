@@ -5,7 +5,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 import { createLogger } from '../../utils/logger'
 import { createTodo } from '../../businessLogic/todo'
-
+import { getUserId } from '../utils'
 
 const logger = createLogger('CreateTodo')
 
@@ -13,8 +13,7 @@ const logger = createLogger('CreateTodo')
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   logger.info('Caller event', event)
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
-  // TODO: get user ID from authentication data
-  const userId = "TODO"
+  const userId = getUserId(event)
   const newItem = await createTodo(userId, newTodo.name, newTodo.dueDate)
 
   return {
