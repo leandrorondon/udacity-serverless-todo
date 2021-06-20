@@ -17,6 +17,13 @@ export async function getUploadUrl(itemId: string): Promise<string> {
     })
 }
 
+export async function deleteFile(itemId: string) {
+    await s3.deleteObject({
+        Bucket: bucketName,
+        Key: itemId
+    }).promise()
+}
+
 export function buildAttachmentUrl(itemId: string): string {
     return `https://${bucketName}.s3.amazonaws.com/${itemId}`
 }

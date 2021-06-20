@@ -38,3 +38,12 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
 
     return result.Items as TodoItem[]
 }
+
+export async function deleteTodoItem(todoId: string) {
+    await docClient.delete({
+        TableName: todosTable,
+        Key: {
+          todoId
+        }
+    }).promise()
+}

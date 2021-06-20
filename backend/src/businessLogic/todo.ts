@@ -1,17 +1,16 @@
-
 import 'source-map-support/register'
 
-import { getUploadUrl, buildAttachmentUrl } from '../dataLayer/FileRepository'
-import { createTodoItem, getTodoItem, getTodosByUser} from '../dataLayer/DataRepository'
+import { getUploadUrl, buildAttachmentUrl, deleteFile } from '../dataLayer/FileRepository'
+import { createTodoItem, getTodoItem, getTodosByUser, deleteTodoItem } from '../dataLayer/DataRepository'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
 
 const logger = createLogger('BL')
 
-export async function generateUploadUrl(id: string): Promise<string> {
-    logger.info('Generating Upload URL for ID: ', id)
-    const url = await getUploadUrl(id)
+export async function generateUploadUrl(todoId: string): Promise<string> {
+    logger.info('Generating Upload URL for ID: ', todoId)
+    const url = await getUploadUrl(todoId)
     return url
 }
 
@@ -35,8 +34,8 @@ export async function createTodo(userId, name, dueDate: string): Promise<TodoIte
     return newItem
 }
 
-export async function setTodoItemAttachment(itemId: string) {
-    const item = await getTodoItem(itemId)
+export async function setTodoItemAttachment(todoId: string) {
+    const item = await getTodoItem(todoId)
     if (!item) {
         return
     }
@@ -45,12 +44,25 @@ export async function setTodoItemAttachment(itemId: string) {
         return
     }
 
-    const url = buildAttachmentUrl(itemId)
+    const url = buildAttachmentUrl(todoId)
     item.attachmentUrl = url
-    logger.info('Setting AttachmentUrl of ', itemId, ': ', url)
+    logger.info('Setting AttachmentUrl of ', todoId, ': ', url)
     await createTodoItem(item)
 }
 
 export async function listTodos(userId: string): Promise<TodoItem[]> {
     return await getTodosByUser(userId)
+}
+
+export async function deleteTodo(todoId: string) {
+    const item = await getTodoItem(todoId)
+    if (!item) {
+        return
+    }
+
+    if (item.attachmentUrl) {
+        await deleteFile(todoId)
+    }
+
+    await deleteTodoItem(todoId)
 }
