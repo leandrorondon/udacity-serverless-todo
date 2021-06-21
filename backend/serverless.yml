@@ -16,6 +16,21 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   tracing: true
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - xray:GetSamplingRules
+        - xray:GetSamplingTargets
+        - xray:GetSamplingStatisticSummaries
+        - xray:BatchGetTraces
+        - xray:GetServiceGraph
+        - xray:GetTraceGraph
+        - xray:GetTraceSummaries
+        - xray:GetGroups
+        - xray:GetGroup
+        - xray:PutTraceSegments
+      Resource:
+        - '*'
 
   environment:
     TODOS_TABLE: Todos-${self:provider.stage}
@@ -58,20 +73,6 @@ functions:
         Action:
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_BY_USER_IDX}
-      - Effect: 'Allow'
-        Action:
-          - xray:GetSamplingRules
-          - xray:GetSamplingTargets
-          - xray:GetSamplingStatisticSummaries
-          - xray:BatchGetTraces
-          - xray:GetServiceGraph
-          - xray:GetTraceGraph
-          - xray:GetTraceSummaries
-          - xray:GetGroups
-          - xray:GetGroup
-          - xray:PutTraceSegments
-        Resource:
-          - '*'
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
