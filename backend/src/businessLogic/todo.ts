@@ -1,7 +1,7 @@
 import 'source-map-support/register'
 
 import { getUploadUrl, buildAttachmentUrl, deleteFile } from '../dataLayer/FileRepository'
-import { createTodoItem, getTodoItem, getTodosByUser, deleteTodoItem, updateTodoItem } from '../dataLayer/DataRepository'
+import { createTodoItem, getTodoItem, getTodosByUser, deleteTodoItem, updateTodoItem, getTodoItemById } from '../dataLayer/DataRepository'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
@@ -36,7 +36,7 @@ export async function createTodo(userId, name, dueDate: string): Promise<TodoIte
 }
 
 export async function setTodoItemAttachment(todoId: string) {
-    const item = await getTodoItem(todoId)
+    const item = await getTodoItemById(todoId)
     if (!item) {
         return
     }
@@ -55,8 +55,8 @@ export async function listTodos(userId: string): Promise<TodoItem[]> {
     return await getTodosByUser(userId)
 }
 
-export async function deleteTodo(todoId: string) {
-    const item = await getTodoItem(todoId)
+export async function deleteTodo(userId, todoId: string) {
+    const item = await getTodoItem(userId, todoId)
     if (!item) {
         return
     }
@@ -65,11 +65,11 @@ export async function deleteTodo(todoId: string) {
         await deleteFile(todoId)
     }
 
-    await deleteTodoItem(todoId)
+    await deleteTodoItem(userId, todoId)
 }
 
-export async function updateTodo(todoId: string, values: TodoUpdate) {
-    const item = await getTodoItem(todoId)
+export async function updateTodo(userId, todoId: string, values: TodoUpdate) {
+    const item = await getTodoItem(userId, todoId)
     if (!item) {
         return
     }

@@ -4,14 +4,16 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } f
 
 import { createLogger } from '../../utils/logger'
 import { deleteTodo } from '../../businessLogic/todo'
+import { getUserId } from '../utils'
 
 const logger = createLogger('DeleteTodo')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     logger.info('Caller event', event)
     const todoId = event.pathParameters.todoId
+    const userId = getUserId(event)
 
-    await deleteTodo(todoId)
+    await deleteTodo(userId, todoId)
 
     return {
         statusCode: 200,

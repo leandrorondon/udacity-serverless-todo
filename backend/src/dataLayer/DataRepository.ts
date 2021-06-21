@@ -9,6 +9,7 @@ const docClient = new XAWS.DynamoDB.DocumentClient()
 
 const todosTable = process.env.TODOS_TABLE
 const todosByUserIdx = process.env.TODOS_BY_USER_IDX
+const todosIdx = process.env.TODO_IDX
 
 export async function createTodoItem(item: TodoItem) {
     await docClient.put({
@@ -17,15 +18,29 @@ export async function createTodoItem(item: TodoItem) {
     }).promise()
 }
 
-export async function getTodoItem(todoId: string): Promise<TodoItem> {
+export async function getTodoItem(userId, todoId: string): Promise<TodoItem> {
     const result = await docClient.get({
         TableName: todosTable,
         Key: {
-          todoId
+            userId, 
+            todoId
         }
       }).promise()
 
     return result.Item as TodoItem
+}
+
+export async function getTodoItemById(todoId: string): Promise<TodoItem> {
+    const result = await docClient.query({
+        TableName: todosTable,
+        IndexName: todosIdx,
+        KeyConditionExpression: 'todoId = :todoId',
+        ExpressionAttributeValues: {
+            ':todoId': todoId
+          }
+      }).promise()
+    
+    return result.Items[0] as TodoItem
 }
 
 export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
@@ -41,10 +56,11 @@ export async function getTodosByUser(userId: string): Promise<TodoItem[]> {
     return result.Items as TodoItem[]
 }
 
-export async function deleteTodoItem(todoId: string) {
+export async function deleteTodoItem(userId, todoId: string) {
     await docClient.delete({
         TableName: todosTable,
         Key: {
+          userId,
           todoId
         }
     }).promise()
@@ -52,9 +68,11 @@ export async function deleteTodoItem(todoId: string) {
 
 export async function updateTodoItem(item: TodoItem) {
     const todoId = item.todoId
+    const userId = item.userId
     await docClient.update({
         TableName: todosTable,
         Key: {
+          userId,
           todoId
         },
         UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
